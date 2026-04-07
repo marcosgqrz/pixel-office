@@ -320,15 +320,19 @@ server.listen(PORT, () => {
   console.log(`Watching ~/.claude/projects/ for active sessions...`);
 });
 
-// Idle shutdown
-setInterval(() => {
-  if (agents.size === 0 && clients.size === 0 && Date.now() - lastActivityTime > IDLE_SHUTDOWN_MS) {
-    console.log("No active sessions or clients for 10 minutes, shutting down...");
-    watcher.stop();
-    server.close();
-    process.exit(0);
-  }
-}, 30_000);
+// Idle shutdown — desabilitado em produção (PORT env var indica Railway/servidor)
+// Só ativa em modo local sem PORT configurado externamente
+const IS_PRODUCTION = !!process.env.PORT;
+if (!IS_PRODUCTION) {
+  setInterval(() => {
+    if (agents.size === 0 && clients.size === 0 && Date.now() - lastActivityTime > IDLE_SHUTDOWN_MS) {
+      console.log("No active sessions or clients for 10 minutes, shutting down...");
+      watcher.stop();
+      server.close();
+      process.exit(0);
+    }
+  }, 30_000);
+}
 
 // Graceful shutdown
 process.on("SIGINT", () => {
