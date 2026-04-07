@@ -2,8 +2,8 @@ import type { FloorColor } from './office/types.js'
 
 // ── Grid & Layout ────────────────────────────────────────────
 export const TILE_SIZE = 16
-export const DEFAULT_COLS = 20
-export const DEFAULT_ROWS = 27
+export const DEFAULT_COLS = 26
+export const DEFAULT_ROWS = 31
 export const MAX_COLS = 64
 export const MAX_ROWS = 64
 

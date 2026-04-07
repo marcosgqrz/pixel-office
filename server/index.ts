@@ -77,8 +77,71 @@ const persistedSeats = loadPersistedSeats();
 
 // Express app
 const app = express();
+app.use(express.json());
 // Serve production build
 app.use(express.static(join(__dirname, "public")));
+
+// ── REST API (for remote orchestrator) ──────────────────────────────────────
+app.post("/api/agent/start", (req, res) => {
+  const { agentName } = req.body as { agentName?: string };
+  if (!agentName) { res.status(400).json({ error: "agentName required" }); return; }
+
+  // Close previous session for this agent if any
+  const existing = agents.get(agentName);
+  if (existing) {
+    broadcast({ type: "agentClosed", id: existing.id });
+    agents.delete(agentName);
+  }
+
+  const id = nextAgentId++;
+  const agent: TrackedAgent = {
+    id,
+    sessionId: agentName,
+    projectDir: "",
+    projectName: agentName,
+    jsonlFile: "",
+    fileOffset: 0,
+    lineBuffer: "",
+    activity: "typing",
+    activeTools: new Map(),
+    activeToolNames: new Map(),
+    activeSubagentToolIds: new Map(),
+    activeSubagentToolNames: new Map(),
+    isWaiting: false,
+    permissionSent: false,
+    hadToolsInTurn: false,
+    lastActivityTime: Date.now(),
+  };
+  agents.set(agentName, agent);
+  lastActivityTime = Date.now();
+
+  broadcast({ type: "agentCreated", id, folderName: agentName });
+  broadcast({ type: "agentStatus", id, status: "typing" });
+  console.log(`[API] Agent started: ${agentName} (id=${id})`);
+  res.json({ ok: true, id });
+});
+
+app.post("/api/agent/finish", (req, res) => {
+  const { agentName } = req.body as { agentName?: string };
+  if (!agentName) { res.status(400).json({ error: "agentName required" }); return; }
+
+  const agent = agents.get(agentName);
+  if (agent) {
+    agent.activity = "waiting";
+    broadcast({ type: "agentStatus", id: agent.id, status: "waiting" });
+    console.log(`[API] Agent finished: ${agentName} (id=${agent.id})`);
+  }
+  res.json({ ok: true });
+});
+
+app.post("/api/agent/finish-all", (_req, res) => {
+  for (const [name, agent] of agents.entries()) {
+    broadcast({ type: "agentClosed", id: agent.id });
+    agents.delete(name);
+    console.log(`[API] Agent closed: ${name} (id=${agent.id})`);
+  }
+  res.json({ ok: true });
+});
 
 const server = createServer(app);
 

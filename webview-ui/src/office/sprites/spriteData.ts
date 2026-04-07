@@ -272,6 +272,157 @@ export const LAMP_SPRITE: SpriteData = (() => {
   ]
 })()
 
+/** Sofa: 32x16 (2 tiles wide, 1 tile tall) — top-down view, 2-seater */
+export const SOFA_SPRITE: SpriteData = (() => {
+  const _ = ''
+  const B = '#2C4A7C' // dark blue fabric
+  const M = '#3A5F9E' // mid blue
+  const L = '#4A78C4' // light blue cushion
+  const A = '#1E3560' // armrest dark
+  const S = '#5588DD' // cushion highlight
+  const G = '#222222' // legs
+  return [
+    [ _, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, _ ],
+    [ B, A, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, A, B ],
+    [ B, A, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, A, B ],
+    [ B, A, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, A, B ],
+    [ B, A, L, L, L, L, L, L, L, L, L, L, L, L, M, M, L, L, L, L, L, L, L, L, L, L, L, L, L, L, A, B ],
+    [ B, A, L, S, S, S, S, S, S, S, S, S, S, L, M, M, L, S, S, S, S, S, S, S, S, S, S, S, S, L, A, B ],
+    [ B, A, L, S, S, S, S, S, S, S, S, S, S, L, M, M, L, S, S, S, S, S, S, S, S, S, S, S, S, L, A, B ],
+    [ B, A, L, S, S, S, S, S, S, S, S, S, S, L, M, M, L, S, S, S, S, S, S, S, S, S, S, S, S, L, A, B ],
+    [ B, A, L, S, S, S, S, S, S, S, S, S, S, L, M, M, L, S, S, S, S, S, S, S, S, S, S, S, S, L, A, B ],
+    [ B, A, L, S, S, S, S, S, S, S, S, S, S, L, M, M, L, S, S, S, S, S, S, S, S, S, S, S, S, L, A, B ],
+    [ B, A, L, L, L, L, L, L, L, L, L, L, L, L, M, M, L, L, L, L, L, L, L, L, L, L, L, L, L, L, A, B ],
+    [ B, A, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, M, A, B ],
+    [ B, A, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, A, B ],
+    [ B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B ],
+    [ _, _, G, G, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, G, G, _, _ ],
+    [ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ],
+  ]
+})()
+
+/** Server rack: 16x32 (1 tile wide, 2 tiles tall) — with drive bays and LEDs */
+export const SERVER_RACK_SPRITE: SpriteData = (() => {
+  const _ = ''
+  const F = '#2A2A2A' // frame dark
+  const P = '#3A3A3A' // panel
+  const U = '#444444' // unit body
+  const G = '#22CC44' // green LED
+  const R = '#CC2222' // red LED
+  const A = '#CCAA22' // amber LED
+  const S = '#888888' // screw
+  const B = '#111111' // border
+  return [
+    [ B, F, F, F, F, F, F, F, F, F, F, F, F, F, F, B ],
+    [ B, F, S, P, P, P, P, P, P, P, P, P, P, P, S, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, P, P, P, P, P, P, P, P, P, P, P, P, P, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, P, P, P, P, P, P, P, P, P, P, P, P, P, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, A, F, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, A, F, B ],
+    [ B, F, P, P, P, P, P, P, P, P, P, P, P, P, P, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, R, R, F, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, R, R, F, B ],
+    [ B, F, P, P, P, P, P, P, P, P, P, P, P, P, P, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, S, P, P, P, P, P, P, P, P, P, P, P, S, B ],
+    [ B, F, F, F, F, F, F, F, F, F, F, F, F, F, F, B ],
+    [ B, F, S, P, P, P, P, P, P, P, P, P, P, P, S, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, P, P, P, P, P, P, P, P, P, P, P, P, P, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, G, F, B ],
+    [ B, F, P, P, P, P, P, P, P, P, P, P, P, P, P, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, A, A, F, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, A, A, F, B ],
+    [ B, F, P, P, P, P, P, P, P, P, P, P, P, P, P, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, R, F, B ],
+    [ B, F, U, U, U, U, U, U, U, U, U, U, G, R, F, B ],
+    [ B, F, S, P, P, P, P, P, P, P, P, P, P, P, S, B ],
+    [ B, F, F, F, F, F, F, F, F, F, F, F, F, F, F, B ],
+  ]
+})()
+
+/** Big plant: 16x32 (1 tile wide, 2 tiles tall) — tall tropical plant */
+export const BIG_PLANT_SPRITE: SpriteData = (() => {
+  const _ = ''
+  const G = '#2E7D32' // dark green
+  const L = '#43A047' // mid green leaf
+  const H = '#66BB6A' // light green highlight
+  const T = '#5D4037' // brown stem
+  const P = '#8D6E63' // pot body
+  const D = '#6D4C41' // pot dark
+  const S = '#A1887F' // pot light
+  return [
+    [ _, _, _, _, _, _, G, G, G, _, _, _, _, _, _, _ ],
+    [ _, _, _, _, G, G, L, L, L, G, G, _, _, _, _, _ ],
+    [ _, _, _, G, L, H, L, L, L, H, L, G, _, _, _, _ ],
+    [ _, _, G, L, H, H, L, T, L, H, H, L, G, _, _, _ ],
+    [ _, G, L, H, L, L, L, T, L, L, L, H, L, G, _, _ ],
+    [ G, L, L, L, L, L, G, T, G, L, L, L, L, L, G, _ ],
+    [ _, G, L, H, L, G, _, T, _, G, L, H, L, G, _, _ ],
+    [ _, _, G, L, G, _, G, T, G, _, G, L, G, _, _, _ ],
+    [ _, _, _, G, _, G, L, T, L, G, _, G, _, _, _, _ ],
+    [ _, _, G, L, G, L, L, T, L, L, G, L, G, _, _, _ ],
+    [ _, G, L, H, L, H, L, T, L, H, L, H, L, G, _, _ ],
+    [ G, L, L, L, L, L, L, T, L, L, L, L, L, L, G, _ ],
+    [ _, G, L, L, L, L, G, T, G, L, L, L, L, G, _, _ ],
+    [ _, _, _, G, G, _, _, T, _, _, G, G, _, _, _, _ ],
+    [ _, _, _, _, _, _, _, T, _, _, _, _, _, _, _, _ ],
+    [ _, _, _, _, _, _, _, T, _, _, _, _, _, _, _, _ ],
+    [ _, _, _, _, _, _, _, T, _, _, _, _, _, _, _, _ ],
+    [ _, _, _, _, _, _, T, T, T, _, _, _, _, _, _, _ ],
+    [ _, _, _, _, _, T, T, T, T, T, _, _, _, _, _, _ ],
+    [ _, _, _, _, D, D, D, D, D, D, D, _, _, _, _, _ ],
+    [ _, _, _, D, P, P, P, P, P, P, P, D, _, _, _, _ ],
+    [ _, _, _, D, P, S, P, P, P, S, P, D, _, _, _, _ ],
+    [ _, _, _, D, P, P, P, P, P, P, P, D, _, _, _, _ ],
+    [ _, _, _, D, P, P, P, P, P, P, P, D, _, _, _, _ ],
+    [ _, _, _, D, P, P, P, P, P, P, P, D, _, _, _, _ ],
+    [ _, _, _, D, P, P, P, P, P, P, P, D, _, _, _, _ ],
+    [ _, _, _, _, D, P, P, P, P, P, D, _, _, _, _, _ ],
+    [ _, _, _, _, D, D, D, D, D, D, D, _, _, _, _, _ ],
+    [ _, _, _, _, _, D, D, D, D, D, _, _, _, _, _, _ ],
+    [ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ],
+    [ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ],
+    [ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ],
+  ]
+})()
+
+/** Coffee table: 32x16 (2 tiles wide, 1 tile tall) — low wooden table */
+export const COFFEE_TABLE_SPRITE: SpriteData = (() => {
+  const _ = ''
+  const E = '#A0522D' // sienna edge
+  const W = '#C4793A' // warm wood
+  const L = '#D4894A' // lighter wood
+  const H = '#E8A060' // highlight
+  const D = '#7A3A1A' // dark edge
+  const G = '#4A2A0A' // legs
+  return [
+    [ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ],
+    [ _, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, _ ],
+    [ _, E, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, E, _ ],
+    [ _, E, W, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, W, E, _ ],
+    [ _, E, W, H, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, H, W, E, _ ],
+    [ _, E, W, H, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, H, W, E, _ ],
+    [ _, E, W, H, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, H, W, E, _ ],
+    [ _, E, W, H, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, H, W, E, _ ],
+    [ _, E, W, H, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, H, W, E, _ ],
+    [ _, E, W, H, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, H, W, E, _ ],
+    [ _, E, W, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, H, W, E, _ ],
+    [ _, E, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, E, _ ],
+    [ _, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, D, _ ],
+    [ _, _, G, G, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, G, G, _, _ ],
+    [ _, _, G, G, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, G, G, _, _ ],
+    [ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ ],
+  ]
+})()
+
 // ── Speech Bubble Sprites ───────────────────────────────────────
 
 /** Permission bubble: white square with "..." in amber, and a tail pointer (11x13) */
