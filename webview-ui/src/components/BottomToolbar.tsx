@@ -10,6 +10,8 @@ interface BottomToolbarProps {
   isDebugMode: boolean
   onToggleDebugMode: () => void
   workspaceFolders: WorkspaceFolder[]
+  isLabelEditMode: boolean
+  onToggleLabelEditMode: () => void
 }
 
 const panelStyle: React.CSSProperties = {
@@ -51,6 +53,8 @@ export function BottomToolbar({
   isDebugMode,
   onToggleDebugMode,
   workspaceFolders,
+  isLabelEditMode,
+  onToggleLabelEditMode,
 }: BottomToolbarProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -161,6 +165,22 @@ export function BottomToolbar({
         title="Edit office layout"
       >
         Layout
+      </button>
+      <button
+        onClick={onToggleLabelEditMode}
+        onMouseEnter={() => setHovered('labels')}
+        onMouseLeave={() => setHovered(null)}
+        style={
+          isLabelEditMode
+            ? { ...btnActive }
+            : {
+                ...btnBase,
+                background: hovered === 'labels' ? 'var(--pixel-btn-hover-bg)' : btnBase.background,
+              }
+        }
+        title="Editar nomes das salas"
+      >
+        Salas
       </button>
       <div style={{ position: 'relative' }}>
         <button

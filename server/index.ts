@@ -44,6 +44,9 @@ const furnitureAssets = loadFurnitureAssets(assetsRoot);
 const persistDir = join(homedir(), ".pixel-agents");
 const persistedLayoutPath = join(persistDir, "layout.json");
 const persistedSeatsPath = join(persistDir, "agent-seats.json");
+const persistedRoomLabelsPath = join(persistDir, "room-labels.json");
+
+interface RoomLabel { name: string; icon: string; col: number; row: number; }
 
 // Load layout: persisted first, then default
 function loadLayout(): Record<string, unknown> | null {
@@ -60,6 +63,16 @@ function loadLayout(): Record<string, unknown> | null {
   return loadDefaultLayout(assetsRoot);
 }
 
+function loadPersistedRoomLabels(): RoomLabel[] | null {
+  if (existsSync(persistedRoomLabelsPath)) {
+    try {
+      const content = readFileSync(persistedRoomLabelsPath, "utf-8");
+      return JSON.parse(content);
+    } catch { return null; }
+  }
+  return null;
+}
+
 function loadPersistedSeats(): Record<number, { palette: number; hueShift: number; seatId: string | null }> | null {
   if (existsSync(persistedSeatsPath)) {
     try {
@@ -74,6 +87,7 @@ function loadPersistedSeats(): Record<number, { palette: number; hueShift: numbe
 
 let currentLayout = loadLayout();
 const persistedSeats = loadPersistedSeats();
+let persistedRoomLabels: RoomLabel[] | null = loadPersistedRoomLabels();
 
 // Express app
 const app = express();
@@ -222,6 +236,10 @@ function sendInitialData(ws: WebSocket): void {
     // Send null layout to trigger default layout creation in the UI
     ws.send(JSON.stringify({ type: "layoutLoaded", layout: null, version: 0 }));
   }
+
+  if (persistedRoomLabels) {
+    ws.send(JSON.stringify({ type: "roomLabelsLoaded", labels: persistedRoomLabels }));
+  }
 }
 
 wss.on("connection", (ws) => {
@@ -255,6 +273,21 @@ wss.on("connection", (ws) => {
           writeFileSync(persistedSeatsPath, JSON.stringify(msg.seats, null, 2));
         } catch (err) {
           console.error(`[Server] Failed to save agent seats: ${err instanceof Error ? err.message : err}`);
+        }
+      } else if (msg.type === "saveRoomLabels") {
+        try {
+          mkdirSync(persistDir, { recursive: true });
+          writeFileSync(persistedRoomLabelsPath, JSON.stringify(msg.labels, null, 2));
+          persistedRoomLabels = msg.labels as RoomLabel[];
+          // Broadcast to other clients for multi-tab sync
+          const data = JSON.stringify({ type: "roomLabelsLoaded", labels: msg.labels });
+          for (const client of clients) {
+            if (client !== ws && client.readyState === WebSocket.OPEN) {
+              client.send(data);
+            }
+          }
+        } catch (err) {
+          console.error(`[Server] Failed to save room labels: ${err instanceof Error ? err.message : err}`);
         }
       }
     } catch {

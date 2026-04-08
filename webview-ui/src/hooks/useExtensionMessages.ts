@@ -9,6 +9,8 @@ import { setWallSprites } from '../office/wallTiles.js'
 import { setCharacterTemplates } from '../office/sprites/spriteData.js'
 import { vscode } from '../vscodeApi.js'
 import { playDoneSound, setSoundEnabled } from '../notificationSound.js'
+import { setRoomLabels, getRoomLabels } from '../office/engine/renderer.js'
+import type { RoomLabel } from '../office/engine/renderer.js'
 
 export interface SubagentCharacter {
   id: number
@@ -50,6 +52,7 @@ export interface ExtensionMessageState {
   layoutReady: boolean
   loadedAssets?: { catalog: FurnitureAsset[]; sprites: Record<string, string[][]> }
   workspaceFolders: WorkspaceFolder[]
+  roomLabels: RoomLabel[]
 }
 
 function saveAgentSeats(os: OfficeState): void {
@@ -75,6 +78,7 @@ export function useExtensionMessages(
   const [layoutReady, setLayoutReady] = useState(false)
   const [loadedAssets, setLoadedAssets] = useState<{ catalog: FurnitureAsset[]; sprites: Record<string, string[][]> } | undefined>()
   const [workspaceFolders, setWorkspaceFolders] = useState<WorkspaceFolder[]>([])
+  const [roomLabels, setRoomLabelsState] = useState<RoomLabel[]>(() => getRoomLabels())
 
   // Track whether initial layout has been loaded (ref to avoid re-render)
   const layoutReadyRef = useRef(false)
@@ -353,6 +357,10 @@ export function useExtensionMessages(
         } catch (err) {
           console.error(`❌ Webview: Error processing furnitureAssetsLoaded:`, err)
         }
+      } else if (msg.type === 'roomLabelsLoaded') {
+        const labels = msg.labels as RoomLabel[]
+        setRoomLabels(labels)
+        setRoomLabelsState(labels)
       }
     }
     window.addEventListener('message', handler)
@@ -360,5 +368,5 @@ export function useExtensionMessages(
     return () => window.removeEventListener('message', handler)
   }, [getOfficeState])
 
-  return { agents, selectedAgent, agentTools, agentStatuses, subagentTools, subagentCharacters, layoutReady, loadedAssets, workspaceFolders }
+  return { agents, selectedAgent, agentTools, agentStatuses, subagentTools, subagentCharacters, layoutReady, loadedAssets, workspaceFolders, roomLabels }
 }

@@ -14,6 +14,9 @@ import { useEditorKeyboard } from './hooks/useEditorKeyboard.js'
 import { ZoomControls } from './components/ZoomControls.js'
 import { BottomToolbar } from './components/BottomToolbar.js'
 import { DebugView } from './components/DebugView.js'
+import { RoomLabelEditor } from './office/components/RoomLabelEditor.js'
+import { setRoomLabels } from './office/engine/renderer.js'
+import type { RoomLabel } from './office/engine/renderer.js'
 
 // Game state lives outside React — updated imperatively by message handlers
 const officeStateRef = { current: null as OfficeState | null }
@@ -121,11 +124,20 @@ function App() {
 
   const isEditDirty = useCallback(() => editor.isEditMode && editor.isDirty, [editor.isEditMode, editor.isDirty])
 
-  const { agents, selectedAgent, agentTools, agentStatuses, subagentTools, subagentCharacters, layoutReady, loadedAssets, workspaceFolders } = useExtensionMessages(getOfficeState, editor.setLastSavedLayout, isEditDirty)
+  const { agents, selectedAgent, agentTools, agentStatuses, subagentTools, subagentCharacters, layoutReady, loadedAssets, workspaceFolders, roomLabels } = useExtensionMessages(getOfficeState, editor.setLastSavedLayout, isEditDirty)
 
   const [isDebugMode, setIsDebugMode] = useState(false)
 
   const handleToggleDebugMode = useCallback(() => setIsDebugMode((prev) => !prev), [])
+
+  const [isLabelEditMode, setIsLabelEditMode] = useState(false)
+
+  const handleLabelsChange = useCallback((labels: RoomLabel[]) => {
+    setRoomLabels(labels)
+    vscode.postMessage({ type: 'saveRoomLabels', labels })
+  }, [])
+
+  const handleToggleLabelEditMode = useCallback(() => setIsLabelEditMode((v) => !v), [])
 
   const handleSelectAgent = useCallback((id: number) => {
     vscode.postMessage({ type: 'focusAgent', id })
@@ -230,6 +242,8 @@ function App() {
         isDebugMode={isDebugMode}
         onToggleDebugMode={handleToggleDebugMode}
         workspaceFolders={workspaceFolders}
+        isLabelEditMode={isLabelEditMode}
+        onToggleLabelEditMode={handleToggleLabelEditMode}
       />
 
       {editor.isEditMode && editor.isDirty && (
@@ -295,6 +309,19 @@ function App() {
         panRef={editor.panRef}
         onCloseAgent={handleCloseAgent}
       />
+
+      {isLabelEditMode && (
+        <RoomLabelEditor
+          labels={roomLabels}
+          onChange={handleLabelsChange}
+          onDone={handleToggleLabelEditMode}
+          containerRef={containerRef}
+          zoom={editor.zoom}
+          panRef={editor.panRef}
+          layoutCols={officeState.getLayout().cols}
+          layoutRows={officeState.getLayout().rows}
+        />
+      )}
 
       {isDebugMode && (
         <DebugView

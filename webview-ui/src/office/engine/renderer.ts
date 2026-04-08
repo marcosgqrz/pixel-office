@@ -528,7 +528,7 @@ export interface SelectionRenderState {
 
 // ── Room Labels ─────────────────────────────────────────────────
 
-interface RoomLabel {
+export interface RoomLabel {
   name: string
   icon: string
   /** Tile column of the label anchor (center of the room top) */
@@ -537,7 +537,7 @@ interface RoomLabel {
   row: number
 }
 
-const ROOM_LABELS: RoomLabel[] = [
+let roomLabels: RoomLabel[] = [
   { name: 'Sala de Reuniões',  icon: '📋', col: 6,    row: 1   },
   { name: 'Tech & Dev',        icon: '💻', col: 19.5, row: 1   },
   { name: 'Criação',           icon: '🎨', col: 3,    row: 9   },
@@ -549,6 +549,9 @@ const ROOM_LABELS: RoomLabel[] = [
   { name: 'Cozinha',           icon: '☕', col: 22.5, row: 20  },
   { name: 'Lounge',            icon: '🛋️',  col: 15.5, row: 27  },
 ]
+
+export function setRoomLabels(labels: RoomLabel[]): void { roomLabels = labels }
+export function getRoomLabels(): RoomLabel[] { return roomLabels }
 
 export function renderRoomLabels(
   ctx: CanvasRenderingContext2D,
@@ -563,7 +566,7 @@ export function renderRoomLabels(
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
 
-  for (const room of ROOM_LABELS) {
+  for (const room of roomLabels) {
     const cx = offsetX + room.col * s + s / 2
     const cy = offsetY + room.row * s + s * 0.5
     const label = `${room.icon} ${room.name}`
