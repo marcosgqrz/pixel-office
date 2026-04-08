@@ -1,7 +1,13 @@
 // WebSocket API — replaces VS Code postMessage bridge
+// Use ws:// for localhost (dev or production build served locally)
+// Use wss:// for remote hosts (Railway, etc.)
+const isLocalhost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+const WS_PROTOCOL = isLocalhost ? "ws" : "wss";
 const WS_URL = import.meta.env.DEV
   ? "ws://localhost:3456"
-  : `wss://${window.location.host}`;
+  : `${WS_PROTOCOL}://${window.location.host}`;
 
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
