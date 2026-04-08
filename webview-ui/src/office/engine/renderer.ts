@@ -526,6 +526,80 @@ export interface SelectionRenderState {
   characters: Map<number, Character>
 }
 
+// ── Room Labels ─────────────────────────────────────────────────
+
+interface RoomLabel {
+  name: string
+  icon: string
+  /** Tile column of the label anchor (center of the room top) */
+  col: number
+  /** Tile row of the label anchor (top of the room) */
+  row: number
+}
+
+const ROOM_LABELS: RoomLabel[] = [
+  { name: 'Sala de Reuniões',  icon: '📋', col: 6,    row: 1   },
+  { name: 'Tech & Dev',        icon: '💻', col: 19.5, row: 1   },
+  { name: 'Criação',           icon: '🎨', col: 3,    row: 9   },
+  { name: 'UX Design',         icon: '✏️',  col: 3,    row: 15  },
+  { name: 'QA',                icon: '🔍', col: 3,    row: 19  },
+  { name: 'DevOps',            icon: '⚙️',  col: 3,    row: 23  },
+  { name: 'Área Principal',    icon: '🏢', col: 13.5, row: 9   },
+  { name: 'Recepção',          icon: '🪴', col: 22.5, row: 9   },
+  { name: 'Cozinha',           icon: '☕', col: 22.5, row: 20  },
+  { name: 'Lounge',            icon: '🛋️',  col: 15.5, row: 27  },
+]
+
+export function renderRoomLabels(
+  ctx: CanvasRenderingContext2D,
+  offsetX: number,
+  offsetY: number,
+  zoom: number,
+): void {
+  const s = TILE_SIZE * zoom
+  const fontSize = Math.max(9, Math.round(7 * zoom))
+  ctx.save()
+  ctx.font = `${fontSize}px "FSPixelSansUnicode", monospace`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+
+  for (const room of ROOM_LABELS) {
+    const cx = offsetX + room.col * s + s / 2
+    const cy = offsetY + room.row * s + s * 0.5
+    const label = `${room.icon} ${room.name}`
+
+    // Measure text for background pill
+    const metrics = ctx.measureText(label)
+    const tw = metrics.width
+    const th = fontSize
+    const padX = Math.max(4, 3 * zoom)
+    const padY = Math.max(2, 1.5 * zoom)
+    const rx = cx - tw / 2 - padX
+    const ry = cy - th / 2 - padY
+    const rw = tw + padX * 2
+    const rh = th + padY * 2
+    const radius = Math.max(3, 2 * zoom)
+
+    // Background pill
+    ctx.save()
+    ctx.globalAlpha = 0.72
+    ctx.fillStyle = '#0d1117'
+    ctx.beginPath()
+    ctx.roundRect(rx, ry, rw, rh, radius)
+    ctx.fill()
+    ctx.restore()
+
+    // Text
+    ctx.save()
+    ctx.globalAlpha = 0.95
+    ctx.fillStyle = '#c9d1d9'
+    ctx.fillText(label, cx, cy)
+    ctx.restore()
+  }
+
+  ctx.restore()
+}
+
 export function renderFrame(
   ctx: CanvasRenderingContext2D,
   canvasWidth: number,
@@ -557,6 +631,9 @@ export function renderFrame(
 
   // Draw tiles (floor + wall base color)
   renderTileGrid(ctx, tileMap, offsetX, offsetY, zoom, tileColors, layoutCols)
+
+  // Room labels (above floor, below furniture/characters)
+  renderRoomLabels(ctx, offsetX, offsetY, zoom)
 
   // Seat indicators (below furniture/characters, on top of floor)
   if (selection) {
