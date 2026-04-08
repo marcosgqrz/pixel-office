@@ -336,6 +336,60 @@ export class OfficeState {
     }
   }
 
+  /** Walk all non-subagent characters to target tiles (round-robin assignment).
+   *  Characters already at a target tile skip pathing. */
+  gatherToArea(targetTiles: Array<{ col: number; row: number }>): void {
+    const chars = Array.from(this.characters.values()).filter((c) => !c.isSubagent)
+    if (chars.length === 0 || targetTiles.length === 0) return
+
+    // Shuffle targets so assignment varies
+    const targets = [...targetTiles]
+
+    chars.forEach((ch, i) => {
+      const target = targets[i % targets.length]
+      // Already there?
+      if (ch.tileCol === target.col && ch.tileRow === target.row) {
+        ch.state = CharacterState.IDLE
+        return
+      }
+      const path = findPath(ch.tileCol, ch.tileRow, target.col, target.row, this.tileMap, this.blockedTiles)
+      if (path.length > 0) {
+        ch.path = path
+        ch.moveProgress = 0
+        ch.state = CharacterState.WALK
+        ch.frame = 0
+        ch.frameTimer = 0
+      }
+    })
+  }
+
+  /** Send all non-subagent characters back to their assigned seats. */
+  returnAllToSeats(): void {
+    for (const ch of this.characters.values()) {
+      if (ch.isSubagent) continue
+      this.sendToSeat(ch.id)
+    }
+  }
+
+  /** Make all non-subagent characters wander to random walkable tiles. */
+  scatterAll(): void {
+    const chars = Array.from(this.characters.values()).filter((c) => !c.isSubagent)
+    if (chars.length === 0 || this.walkableTiles.length === 0) return
+    for (const ch of chars) {
+      // Pick a random tile far from current position
+      const shuffled = [...this.walkableTiles].sort(() => Math.random() - 0.5)
+      const target = shuffled[0]
+      const path = findPath(ch.tileCol, ch.tileRow, target.col, target.row, this.tileMap, this.blockedTiles)
+      if (path.length > 0) {
+        ch.path = path
+        ch.moveProgress = 0
+        ch.state = CharacterState.WALK
+        ch.frame = 0
+        ch.frameTimer = 0
+      }
+    }
+  }
+
   /** Walk an agent to an arbitrary walkable tile (right-click command) */
   walkToTile(agentId: number, col: number, row: number): boolean {
     const ch = this.characters.get(agentId)

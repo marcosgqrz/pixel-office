@@ -1,4 +1,5 @@
 import { TileType, TILE_SIZE, CharacterState } from '../types.js'
+import { ACTION_ZONES } from './actionZones.js'
 import type { TileType as TileTypeVal, FurnitureInstance, Character, SpriteData, Seat, FloorColor } from '../types.js'
 import { getCachedSprite, getOutlineSprite } from '../sprites/spriteCache.js'
 import { getCharacterSprites, BUBBLE_PERMISSION_SPRITE, BUBBLE_WAITING_SPRITE } from '../sprites/spriteData.js'
@@ -603,6 +604,78 @@ export function renderRoomLabels(
   ctx.restore()
 }
 
+// ── Action Zones ──────────────────────────────────────────────────
+
+export function renderActionZones(
+  ctx: CanvasRenderingContext2D,
+  offsetX: number,
+  offsetY: number,
+  zoom: number,
+  hoveredZoneId: string | null,
+  time: number,
+): void {
+  const s = TILE_SIZE * zoom
+  ctx.save()
+
+  for (const zone of ACTION_ZONES) {
+    const x = offsetX + zone.col * s
+    const y = offsetY + zone.row * s
+    const w = zone.w * s
+    const h = zone.h * s
+    const isHovered = hoveredZoneId === zone.id
+
+    // Pulsing alpha
+    const pulse = isHovered
+      ? 0.55 + 0.15 * Math.sin(time * 4)
+      : 0.22 + 0.08 * Math.sin(time * 1.5)
+
+    // Fill overlay with pulsing alpha
+    ctx.save()
+    ctx.globalAlpha = pulse
+    ctx.fillStyle = zone.color.replace(/[\d.]+\)$/, '1)')
+    ctx.fillRect(x, y, w, h)
+
+    // Border on hover
+    if (isHovered) {
+      ctx.globalAlpha = 0.8
+      ctx.strokeStyle = zone.color.replace(/[\d.]+\)$/, '0.8)')
+      ctx.lineWidth = Math.max(1, 2 * zoom)
+      ctx.setLineDash([4 * zoom, 3 * zoom])
+      ctx.strokeRect(x + 1, y + 1, w - 2, h - 2)
+      ctx.setLineDash([])
+    }
+    ctx.restore()
+
+    // Label in center of zone
+    if (isHovered || zoom >= 2) {
+      const cx = x + w / 2
+      const cy = y + h / 2
+      const fontSize = Math.max(10, Math.round(8 * zoom))
+      ctx.save()
+      ctx.font = `${fontSize}px "FSPixelSansUnicode", monospace`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      const label = `${zone.icon} ${zone.label}`
+      const metrics = ctx.measureText(label)
+      const tw = metrics.width
+      const th = fontSize
+      const padX = 4 * zoom
+      const padY = 3 * zoom
+      // Background
+      ctx.globalAlpha = 0.82
+      ctx.fillStyle = '#0d1117'
+      ctx.fillRect(cx - tw / 2 - padX, cy - th / 2 - padY, tw + padX * 2, th + padY * 2)
+      // Text
+      ctx.globalAlpha = 1
+      ctx.fillStyle = isHovered ? '#a5b4fc' : '#94a3b8'
+      ctx.fillText(label, cx, cy)
+      ctx.restore()
+    }
+  }
+
+  ctx.restore()
+}
+
 export function renderFrame(
   ctx: CanvasRenderingContext2D,
   canvasWidth: number,
@@ -618,6 +691,8 @@ export function renderFrame(
   tileColors?: Array<FloorColor | null>,
   layoutCols?: number,
   layoutRows?: number,
+  hoveredZoneId?: string | null,
+  frameTime?: number,
 ): { offsetX: number; offsetY: number } {
   // Clear
   ctx.clearRect(0, 0, canvasWidth, canvasHeight)
@@ -637,6 +712,9 @@ export function renderFrame(
 
   // Room labels (above floor, below furniture/characters)
   renderRoomLabels(ctx, offsetX, offsetY, zoom)
+
+  // Action zones (interactive clickable areas)
+  renderActionZones(ctx, offsetX, offsetY, zoom, hoveredZoneId ?? null, frameTime ?? 0)
 
   // Seat indicators (below furniture/characters, on top of floor)
   if (selection) {

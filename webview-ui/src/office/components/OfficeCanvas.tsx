@@ -1,5 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react'
 import type { OfficeState } from '../engine/officeState.js'
+import { getActionZoneAt } from '../engine/actionZones.js'
+import type { ActionZone } from '../engine/actionZones.js'
 import type { EditorState } from '../editor/editorState.js'
 import type { EditorRenderState, SelectionRenderState, DeleteButtonBounds, RotateButtonBounds } from '../engine/renderer.js'
 import { startGameLoop } from '../engine/gameLoop.js'
@@ -26,9 +28,10 @@ interface OfficeCanvasProps {
   zoom: number
   onZoomChange: (zoom: number) => void
   panRef: React.MutableRefObject<{ x: number; y: number }>
+  onActionZoneClick?: (zone: ActionZone) => void
 }
 
-export function OfficeCanvas({ officeState, onClick, isEditMode, editorState, onEditorTileAction, onEditorEraseAction, onEditorSelectionChange, onDeleteSelected, onRotateSelected, onDragMove, editorTick: _editorTick, zoom, onZoomChange, panRef }: OfficeCanvasProps) {
+export function OfficeCanvas({ officeState, onClick, isEditMode, editorState, onEditorTileAction, onEditorEraseAction, onEditorSelectionChange, onDeleteSelected, onRotateSelected, onDragMove, editorTick: _editorTick, zoom, onZoomChange, panRef, onActionZoneClick }: OfficeCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const offsetRef = useRef({ x: 0, y: 0 })
@@ -42,6 +45,9 @@ export function OfficeCanvas({ officeState, onClick, isEditMode, editorState, on
   const isEraseDraggingRef = useRef(false)
   // Zoom scroll accumulator for trackpad pinch sensitivity
   const zoomAccumulatorRef = useRef(0)
+  // Action zone hover and frame time
+  const hoveredZoneIdRef = useRef<string | null>(null)
+  const frameTimeRef = useRef(0)
 
   // Clamp pan so the map edge can't go past a margin inside the viewport
   const clampPan = useCallback((px: number, py: number): { x: number; y: number } => {
@@ -88,6 +94,7 @@ export function OfficeCanvas({ officeState, onClick, isEditMode, editorState, on
     const stop = startGameLoop(canvas, {
       update: (dt) => {
         officeState.update(dt)
+        frameTimeRef.current += dt
       },
       render: (ctx) => {
         // Canvas dimensions are in device pixels
@@ -218,6 +225,8 @@ export function OfficeCanvas({ officeState, onClick, isEditMode, editorState, on
           officeState.getLayout().tileColors,
           officeState.getLayout().cols,
           officeState.getLayout().rows,
+          hoveredZoneIdRef.current,
+          frameTimeRef.current,
         )
         offsetRef.current = { x: offsetX, y: offsetY }
 
@@ -391,6 +400,14 @@ export function OfficeCanvas({ officeState, onClick, isEditMode, editorState, on
             }
           }
         }
+        // Check action zone hover
+        if (hitId === null) {
+          const zone = tile ? getActionZoneAt(tile.col, tile.row) : null
+          hoveredZoneIdRef.current = zone?.id ?? null
+          if (zone) cursor = 'pointer'
+        } else {
+          hoveredZoneIdRef.current = null
+        }
         canvas.style.cursor = cursor
       }
       officeState.hoveredAgentId = hitId
@@ -562,6 +579,18 @@ export function OfficeCanvas({ officeState, onClick, isEditMode, editorState, on
         return
       }
 
+      // No agent hit — check action zone click
+      if (onActionZoneClick) {
+        const zoneTile = screenToTile(e.clientX, e.clientY)
+        if (zoneTile) {
+          const zone = getActionZoneAt(zoneTile.col, zoneTile.row)
+          if (zone) {
+            onActionZoneClick(zone)
+            return
+          }
+        }
+      }
+
       // No agent hit — check seat click while agent is selected
       if (officeState.selectedAgentId !== null) {
         const selectedCh = officeState.characters.get(officeState.selectedAgentId)
@@ -602,7 +631,7 @@ export function OfficeCanvas({ officeState, onClick, isEditMode, editorState, on
         officeState.cameraFollowId = null
       }
     },
-    [officeState, onClick, screenToWorld, screenToTile, isEditMode],
+    [officeState, onClick, screenToWorld, screenToTile, isEditMode, onActionZoneClick],
   )
 
   const handleMouseLeave = useCallback(() => {
@@ -615,6 +644,7 @@ export function OfficeCanvas({ officeState, onClick, isEditMode, editorState, on
     editorState.ghostRow = -1
     officeState.hoveredAgentId = null
     officeState.hoveredTile = null
+    hoveredZoneIdRef.current = null
   }, [officeState, editorState])
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {

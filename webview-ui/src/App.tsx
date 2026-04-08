@@ -17,6 +17,9 @@ import { DebugView } from './components/DebugView.js'
 import { RoomLabelEditor } from './office/components/RoomLabelEditor.js'
 import { setRoomLabels } from './office/engine/renderer.js'
 import type { RoomLabel } from './office/engine/renderer.js'
+import { QuickActionBar } from './components/QuickActionBar.js'
+import { ACTION_ZONES } from './office/engine/actionZones.js'
+import type { ActionZone } from './office/engine/actionZones.js'
 
 // Game state lives outside React — updated imperatively by message handlers
 const officeStateRef = { current: null as OfficeState | null }
@@ -139,6 +142,37 @@ function App() {
 
   const handleToggleLabelEditMode = useCallback(() => setIsLabelEditMode((v) => !v), [])
 
+  const [showQuickActions] = useState(true)
+
+  const handleActionZoneClick = useCallback((zone: ActionZone) => {
+    const os = getOfficeState()
+    const z = ACTION_ZONES.find((a) => a.id === zone.id)
+    if (z) os.gatherToArea(z.targetTiles)
+  }, [])
+
+  const handleGatherConference = useCallback(() => {
+    const z = ACTION_ZONES.find((a) => a.id === 'conference')
+    if (z) getOfficeState().gatherToArea(z.targetTiles)
+  }, [])
+
+  const handleGatherLounge = useCallback(() => {
+    const z = ACTION_ZONES.find((a) => a.id === 'lounge')
+    if (z) getOfficeState().gatherToArea(z.targetTiles)
+  }, [])
+
+  const handleGatherMain = useCallback(() => {
+    const z = ACTION_ZONES.find((a) => a.id === 'main')
+    if (z) getOfficeState().gatherToArea(z.targetTiles)
+  }, [])
+
+  const handleReturnToSeats = useCallback(() => {
+    getOfficeState().returnAllToSeats()
+  }, [])
+
+  const handleScatter = useCallback(() => {
+    getOfficeState().scatterAll()
+  }, [])
+
   const handleSelectAgent = useCallback((id: number) => {
     vscode.postMessage({ type: 'focusAgent', id })
   }, [])
@@ -220,6 +254,7 @@ function App() {
         zoom={editor.zoom}
         onZoomChange={editor.handleZoomChange}
         panRef={editor.panRef}
+        onActionZoneClick={handleActionZoneClick}
       />
 
       <ZoomControls zoom={editor.zoom} onZoomChange={editor.handleZoomChange} />
@@ -234,6 +269,16 @@ function App() {
           zIndex: 40,
         }}
       />
+
+      {showQuickActions && !editor.isEditMode && (
+        <QuickActionBar
+          onGatherConference={handleGatherConference}
+          onGatherLounge={handleGatherLounge}
+          onGatherMain={handleGatherMain}
+          onReturnToSeats={handleReturnToSeats}
+          onScatter={handleScatter}
+        />
+      )}
 
       <BottomToolbar
         isEditMode={editor.isEditMode}
